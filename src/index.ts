@@ -3,7 +3,7 @@ import { DependencyList, useState, useCallback } from 'react'
 export default function usePromiseFunc<R>(
   func: () => Promise<R>,
   deps: DependencyList = []
-): [() => void, boolean, Error, R | undefined] {
+): [() => void, boolean, any, R | undefined] {
   const [dispose, setDispose] = useState<null | (() => void)>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [err, setErr] = useState<any>()

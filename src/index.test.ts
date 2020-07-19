@@ -1,15 +1,23 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { renderHook, act } from '@testing-library/react-hooks'
 import usePromiseFunc from '.'
 
-test('simple smoking', async () => {
+const sleep = function (time: number) {
+  return new Promise((res) => {
+    setTimeout(res, time)
+  })
+}
+
+test('smoking', async () => {
   const PROMISE_RESOLVE_DATA = {}
   const getData = async function () {
     return PROMISE_RESOLVE_DATA
   }
-  const { result, waitForNextUpdate } = renderHook(() =>
-    usePromiseFunc(getData)
-  )
+  const { result, waitForNextUpdate } = renderHook(() => {
+    const [fn, ...other] = usePromiseFunc(getData)
+    useEffect(fn, [])
+    return other
+  })
   expect(result.current).toEqual([true, undefined, undefined])
 
   await waitForNextUpdate()
@@ -22,31 +30,38 @@ test('throw error', async () => {
     throw PROMISE_ERROR
   }
 
-  const { result, waitForNextUpdate } = renderHook(() =>
-    usePromiseFunc(getData)
-  )
+  const { result, waitForNextUpdate } = renderHook(() => {
+    const [fn, ...other] = usePromiseFunc(getData)
+    useEffect(fn, [])
+    return other
+  })
   expect(result.current).toEqual([true, undefined, undefined])
+
   await waitForNextUpdate()
   expect(result.current).toEqual([false, PROMISE_ERROR, undefined])
 })
 
-test('dependency change before loaded test', async () => {
-  const PROMISE_RESOLVE_DATA = {}
+test('rerun before loaded test', async () => {
+  let PROMISE_RESOLVE_DATA = {}
   const getData = async function () {
+    await sleep(200)
     return PROMISE_RESOLVE_DATA
   }
   const { result, waitForNextUpdate } = renderHook(() => {
     const [lastRefreshTime, setLastRefreshTime] = useState(0)
-    const res = usePromiseFunc(getData, [lastRefreshTime])
-    return { res, setLastRefreshTime }
+    const [fn, ...other] = usePromiseFunc(getData)
+    useEffect(fn, [lastRefreshTime])
+    return { res: other, setLastRefreshTime }
   })
   expect(result.current.res).toEqual([true, undefined, undefined])
-
+  await sleep(100)
   act(() => {
     result.current.setLastRefreshTime(new Date().valueOf())
   })
 
+  await sleep(150)
   expect(result.current.res).toEqual([true, undefined, undefined])
+
   await waitForNextUpdate()
   expect(result.current.res).toEqual([false, undefined, PROMISE_RESOLVE_DATA])
 })

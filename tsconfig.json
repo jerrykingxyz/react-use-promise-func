@@ -1,10 +1,10 @@
 {
   "compilerOptions": {
-    "lib": ["dom", "es2015"],
-    "outDir": "dist",
+    "lib": ["dom", "ES2015"],
+    "outDir": "lib",
     "module": "esnext",
-    "moduleResolution": "node",
     "declaration": true,
+    "moduleResolution": "node",
     "noImplicitReturns": true,
     "noImplicitThis": true,
     "noImplicitAny": true,
@@ -12,11 +12,9 @@
     "suppressImplicitAnyIndexErrors": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "allowSyntheticDefaultImports": true,
     "target": "es5",
-    "skipLibCheck": true,
     "strict": true
   },
   "include": ["src"],
-  "exclude": ["node_modules", "dist", "example"]
+  "exclude": ["src/**/*.test.ts"]
 }

@@ -1,14 +1,18 @@
-import { DependencyList, useState, useEffect } from 'react'
+import { DependencyList, useState, useCallback } from 'react'
 
 export default function usePromiseFunc<R>(
   func: () => Promise<R>,
   deps: DependencyList = []
-): [boolean, Error, R | undefined] {
+): [() => void, boolean, Error, R | undefined] {
+  const [dispose, setDispose] = useState<null | (() => void)>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [err, setErr] = useState<any>()
   const [data, setData] = useState<R | undefined>()
 
-  useEffect(() => {
+  const fn = useCallback(() => {
+    if (dispose) {
+      dispose()
+    }
     let canceled = false
 
     setIsLoading(true)
@@ -33,10 +37,12 @@ export default function usePromiseFunc<R>(
         }
       )
 
-    return () => {
-      canceled = true
-    }
-  }, deps)
+    setDispose(() => {
+      return () => {
+        canceled = true
+      }
+    })
+  }, [dispose, ...deps])
 
-  return [isLoading, err, data]
+  return [fn, isLoading, err, data]
 }

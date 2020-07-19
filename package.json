@@ -2,8 +2,14 @@
   "name": "react-use-promise-func",
   "version": "0.0.1",
   "description": "",
-  "main": "index.js",
+  "main": "lib/index.js",
+  "typings": "lib/index.d.ts",
+  "module": "lib/index.mjs",
   "scripts": {
+    "clean": "rm -rf lib",
+    "build:umd": "tsc -m UMD",
+    "build:esm": "tsc -m ESNext && mv lib/index.js lib/index.mjs",
+    "build": "npm run clean && npm run build:esm && npm run build:umd",
     "lint": "prettier -l 'src/**/*.ts'",
     "test": "jest",
     "validate": "npm run lint && npm run test"

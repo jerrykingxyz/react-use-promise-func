@@ -1,17 +1,17 @@
-import { DependencyList, useState, useCallback } from 'react'
+import { DependencyList, useRef, useState, useCallback } from 'react'
 
 export default function usePromiseFunc<R>(
   func: () => Promise<R>,
   deps: DependencyList = []
 ): [() => void, boolean, any, R | undefined] {
-  const [dispose, setDispose] = useState<null | (() => void)>(null)
+  const disposeRef = useRef<null | (() => void)>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [err, setErr] = useState<any>()
   const [data, setData] = useState<R | undefined>()
 
   const fn = useCallback(() => {
-    if (dispose) {
-      dispose()
+    if (disposeRef.current) {
+      disposeRef.current()
     }
     let canceled = false
 
@@ -37,12 +37,10 @@ export default function usePromiseFunc<R>(
         }
       )
 
-    setDispose(() => {
-      return () => {
-        canceled = true
-      }
-    })
-  }, [dispose, ...deps])
+    disposeRef.current = () => {
+      canceled = true
+    }
+  }, deps)
 
   return [fn, isLoading, err, data]
 }

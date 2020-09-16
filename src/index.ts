@@ -1,15 +1,15 @@
 import { DependencyList, useRef, useState, useCallback } from 'react'
 
-export default function usePromiseFunc<R>(
-  func: () => Promise<R>,
-  deps: DependencyList = []
-): [() => void, boolean, any, R | undefined] {
+export default function usePromiseFunc<A extends Array<any>, R>(
+  func: (...args: A) => Promise<R>,
+  deps: DependencyList
+): [(...args: A) => void, boolean, any, R | undefined] {
   const disposeRef = useRef<null | (() => void)>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [err, setErr] = useState<any>()
   const [data, setData] = useState<R | undefined>()
 
-  const fn = useCallback(() => {
+  const fn = useCallback((...args: any) => {
     if (disposeRef.current) {
       disposeRef.current()
     }
@@ -17,7 +17,7 @@ export default function usePromiseFunc<R>(
 
     setIsLoading(true)
     Promise.resolve()
-      .then(() => func())
+      .then(() => func(...args))
       .then(
         (res) => {
           if (canceled) {

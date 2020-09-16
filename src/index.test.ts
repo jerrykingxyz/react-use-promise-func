@@ -14,7 +14,7 @@ test('smoking', async () => {
     return PROMISE_RESOLVE_DATA
   }
   const { result, waitForNextUpdate } = renderHook(() => {
-    const [fn, ...other] = usePromiseFunc(getData)
+    const [fn, ...other] = usePromiseFunc(getData, [])
     useEffect(fn, [])
     return other
   })
@@ -31,7 +31,7 @@ test('throw error', async () => {
   }
 
   const { result, waitForNextUpdate } = renderHook(() => {
-    const [fn, ...other] = usePromiseFunc(getData)
+    const [fn, ...other] = usePromiseFunc(getData, [])
     useEffect(fn, [])
     return other
   })
@@ -39,6 +39,28 @@ test('throw error', async () => {
 
   await waitForNextUpdate()
   expect(result.current).toEqual([false, PROMISE_ERROR, undefined])
+})
+
+test('run promise func with params', async () => {
+  const testData = 1
+  const transform = (num: number) => {
+    return num + 1
+  }
+  const promiseTrans = async (num: number) => {
+    return transform(num)
+  }
+
+  const { result, waitForNextUpdate } = renderHook(() => {
+    const [fn, ...other] = usePromiseFunc(promiseTrans, [])
+    useEffect(() => {
+      fn(testData)
+    }, [])
+    return other
+  })
+  expect(result.current).toEqual([true, undefined, undefined])
+
+  await waitForNextUpdate()
+  expect(result.current).toEqual([false, undefined, transform(testData)])
 })
 
 test('rerun before loaded test', async () => {
@@ -49,7 +71,7 @@ test('rerun before loaded test', async () => {
   }
   const { result, waitForNextUpdate } = renderHook(() => {
     const [lastRefreshTime, setLastRefreshTime] = useState(0)
-    const [fn, ...other] = usePromiseFunc(getData)
+    const [fn, ...other] = usePromiseFunc(getData, [])
     useEffect(fn, [lastRefreshTime])
     return { res: other, setLastRefreshTime }
   })

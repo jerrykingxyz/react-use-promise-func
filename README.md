@@ -21,7 +21,7 @@ import usePromiseFunc from 'react-use-promise-func'
 export default function() {
   const [fn, isLoading, error, data] = usePromiseFunc(() => {
     // fetch api
-  })
+  }, [])
   
   useEffect(fn, [])
   
@@ -39,7 +39,7 @@ export default function() {
 ``` typescript
 function usePromiseFunc<R> (
   func: () => Promise<R>,
-  deps?: DependencyList
+  deps: DependencyList
 ): [
   () => void,
   boolean,

@@ -1,6 +1,6 @@
 {
   "name": "react-use-promise-func",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "a react hook for use promise function.",
   "main": "lib/index.js",
   "typings": "esm/index.d.ts",
